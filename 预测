@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>加拿大28自动预测</title>
+
+<style>
+body{
+  font-family: Arial;
+  background:#f2f2f2;
+  text-align:center;
+}
+
+.box{
+  width:500px;
+  margin:40px auto;
+  background:#fff;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input{
+  padding:10px;
+  width:200px;
+  margin-top:15px;
+}
+
+button{
+  padding:10px 20px;
+  margin-top:15px;
+  background:#2196f3;
+  color:#fff;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+.result{
+  margin-top:25px;
+  font-size:18px;
+  font-weight:bold;
+}
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<h2>加拿大28预测系统</h2>
+
+<div>最新开奖号码：<span id="last">读取中...</span></div>
+
+<input id="kill" placeholder="输入杀组，例如 大单">
+
+<br>
+
+<button onclick="predict()">开始预测</button>
+
+<div class="result" id="output"></div>
+
+</div>
+
+<script>
+
+let historyData = [];
+
+// 自动读取开奖
+async function loadData(){
+
+  try{
+
+    const res = await fetch("https://dkfile.istester.com/api/kj.json?nbr=50");
+
+    const json = await res.json();
+
+    historyData = json.data.map(i=>Number(i.num));
+
+    document.getElementById("last").textContent = historyData[0];
+
+  }catch(e){
+
+    document.getElementById("last").textContent="API读取失败";
+
+  }
+}
+
+loadData();
+
+
+// 判断组合类型
+function getType(n){
+
+  let size = n>=14 ? "大" : "小";
+  let odd  = n%2==0 ? "双" : "单";
+
+  return size+odd;
+}
+
+
+// 预测
+function predict(){
+
+  let kill = document.getElementById("kill").value.trim();
+
+  if(kill==""){
+    alert("请先输入杀组");
+    return;
+  }
+
+  let freq = new Array(28).fill(0);
+
+  historyData.forEach(n=>{
+    freq[n]++;
+  });
+
+  let result = [];
+
+  for(let i=0;i<28;i++){
+
+    let type = getType(i);
+
+    if(type!=kill){
+      result.push({num:i, count:freq[i]});
+    }
+  }
+
+  // 出现次数少的优先
+  result.sort((a,b)=>a.count-b.count);
+
+  let final = result.slice(0,6).map(i=>i.num);
+
+  document.getElementById("output").innerHTML =
+    "推荐号码： " + final.join(" , ");
+}
+
+</script>
+
+</body>
+</html>
